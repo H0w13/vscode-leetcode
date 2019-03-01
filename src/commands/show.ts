@@ -53,14 +53,14 @@ async function showProblemInternal(node: IProblem): Promise<void> {
 
         let outDir: string = await selectWorkspaceFolder();
         let relativePath: string = (leetCodeConfig.get<string>("outputFolder") || "").trim();
-        const matchResult: RegExpMatchArray | null = relativePath.match(/\$\{(.*?)\}/);
-        if (matchResult) {
+        let matchResult:RegExpMatchArray | null;
+        while (matchResult = relativePath.match(/\{(.*?)\}/)) {
             const resolvedPath: string | undefined = await resolveRelativePath(matchResult[1].toLocaleLowerCase(), node, language);
             if (!resolvedPath) {
                 leetCodeChannel.appendLine("Showing problem canceled by user.");
                 return;
             }
-            relativePath = resolvedPath;
+            relativePath = relativePath.replace(matchResult[0], resolvedPath);                
         }
 
         outDir = path.join(outDir, relativePath);
